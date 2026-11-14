@@ -1,45 +1,46 @@
 # LinkedIn Video Script: Volatility Forecast Simulator (1 minute)
 
-About 155 words, about 60 seconds at a normal pace.
+About 160 words, about 60 seconds at a normal pace. Every number is shown on screen in the simulator at that moment.
 Lines in *[brackets]* are what to do on screen; do not read them aloud.
 
 ---
 
-*[0:00 — Open the simulator on tab **1 · Forecast vs reality**, stock **RELIANCE**.]*
+*[0:00 — Tab **1 · Forecast vs reality**, stock **RELIANCE**.]*
 
-"Can deep learning forecast stock volatility better than classic econometrics? We tested four models on 95 NIFTY 100 stocks, using ten years of 5-minute NSE data.
+"Can deep learning forecast volatility better than classic econometrics? We tested four models on 95 NIFTY 100 stocks, from January 2025 to April 2026, using only past data.
 
-The black line is the volatility that actually happened. The coloured lines are each model's next-day forecast, made only from past data."
+The black line is actual volatility; the coloured lines are next-day forecasts. For Reliance, the most liquid stock, simple log-HAR is best."
 
-*[0:15 — Change the stock to **TRENT**.]*
+*[0:15 — Change the stock to **ADANIGREEN**.]*
 
-"Overall, our LSTM has the lowest error: 15% below the standard HAR model, and it is the best model on 66 of the 95 stocks."
+"For Adani Green, a less liquid stock, our HAR-RV-LSTM wins: QLIKE 0.260, against 0.365 for HAR-RV."
 
-*[0:25 — Click tab **5 · Does liquidity matter?**]*
+*[0:24 — Click tab **5 · Does liquidity matter?**]*
 
-"Each dot is a stock. For liquid names, a simple model is enough. As liquidity falls, the LSTM's edge grows, to about 3%."
+"Across groups, the LSTM's gain grows from 0.2% in liquid stocks to 3.0% in illiquid ones."
 
-*[0:37 — Click tab **2 · Options desk**, notional **1 crore**.]*
+*[0:32 — Click tab **2 · Options desk**, notional **1 crore**.]*
 
-"In real money: on a 1-crore straddle, better forecasts cut pricing errors from about 36,700 to 30,600 rupees a day."
+"On a 1-crore straddle, the pricing error falls from 75,412 to 55,487 rupees a day."
 
-*[0:47 — Click tab **4 · Portfolio sizing**.]*
+*[0:41 — Click tab **3 · Risk & futures margin**, multiplier **2.33 (99%)**.]*
 
-"And position risk stays within 5% of budget."
+"Margin drops from 6.50 to 5.73 lakh, with breaches at 0.96%, right on the 1% target."
 
-*[0:53 — Scroll down to the **All 95 stocks** table.]*
+*[0:50 — Scroll down to the **All 95 stocks** table.]*
 
-"Better forecasts, better option prices, steadier risk. Paper and code in the comments."
+"Overall, the LSTM is the best model on 66 of 95 stocks. Paper and code in the comments."
 
 ---
 
-## Numbers used (for checking)
+## Numbers on screen (for checking)
 
-| Figure | Value | Source |
-|---|---|---|
-| Data | 95 NIFTY 100 stocks, 5-minute NSE data | Paper, Section 3 |
-| LSTM vs HAR-RV | QLIKE 15.4% lower | Paper, Table 4 |
-| Best model on | 66 of 95 stocks | Simulator, all-stocks table |
-| Gain over log-HAR, least liquid third | 3.0% | Paper, Table 7 |
-| Straddle pricing error, ₹1 cr | HAR-RV ₹36,749, LSTM ₹30,590 per day | Simulator, all-stocks table |
-| Risk off budget | LSTM 5% | Simulator, all-stocks table |
+| Said | Where in the simulator |
+|---|---|
+| 95 NIFTY 100 stocks, Jan 2025 – Apr 2026 | Page header |
+| Reliance: best model log-HAR | Tab 1, RELIANCE, yellow box |
+| Adani Green: LSTM QLIKE 0.260 vs HAR-RV 0.365 | Tab 1, ADANIGREEN, right-hand list |
+| 0.2% → 3.0% | Tab 5, yellow box and bars |
+| ₹75,412 → ₹55,487 per day | Tab 2, ADANIGREEN, ₹1 crore, yellow box |
+| ₹6.50 lakh → ₹5.73 lakh; 0.96% breaches | Tab 3, ADANIGREEN, 2.33×, right-hand list |
+| Best on 66 of 95 stocks | All-stocks table, "Best on" column |
