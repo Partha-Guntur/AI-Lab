@@ -14,6 +14,7 @@ It opens in your browser at http://localhost:8501.
 ## Files
 
 - `app.py`: the plain-language app (five tabs plus a scorecard). Run it from a terminal, not a notebook.
+- `offline_backup.html`: backup if Streamlit will not start; double-click to open in any browser.
 - `app_technical.py`: the earlier technical version (`streamlit run app_technical.py`).
 - `simulator_data.csv`: one row per stock and test day. `rv`, `har`, `lhar`, `lstm`, `eg` are daily
   volatility in basis points (realized, and the four model forecasts); `ret` is the intraday return

@@ -8,3 +8,6 @@ arch>=7.0
 torch>=2.4
 matplotlib>=3.8
 jupyter
+# simulator
+streamlit>=1.30
+plotly>=5.18

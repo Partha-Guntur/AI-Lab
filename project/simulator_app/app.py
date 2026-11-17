@@ -1,6 +1,4 @@
-"""Volatility Forecast Simulator, plain-language version (Streamlit).
-
-Run from a terminal (not a notebook):   streamlit run app.py
+"""Volatility Forecast Simulator.
 
 Data: simulator_data.csv, one row per stock and test day (1 Jan 2025 - 9 Apr 2026).
   rv, har, lhar, lstm, eg : daily volatility in basis points (actual, and four model forecasts)
@@ -13,20 +11,19 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-st.set_page_config(page_title="Can AI predict market risk?", layout="wide")
+st.set_page_config(page_title="Can an ML model predict market risk?", layout="wide")
 
-# Plain names first, technical names in brackets
 MODELS = {
     "har": "Classic formula",
     "lhar": "Improved formula",
-    "lstm": "AI model",
-    "eg": "AI on daily prices only",
+    "lstm": "ML model",
+    "eg": "ML on daily prices only",
 }
 TECH = {"har": "HAR-RV", "lhar": "log-HAR", "lstm": "HAR-RV-LSTM", "eg": "EGARCH-LSTM"}
 COLORS = {"har": "#2a78d6", "lhar": "#eb6834", "lstm": "#1baf7a", "eg": "#b98000", "rv": "#101418"}
 GROUPS = {"H": "Heavily traded", "M": "Moderately traded", "L": "Thinly traded"}
 GROUP_COLORS = {"H": "#2a78d6", "M": "#eb6834", "L": "#1baf7a"}
-K = np.sqrt(2 / np.pi)        # fair one-day protection cost ~ 0.8 x expected move x amount
+K = np.sqrt(2 / np.pi)
 
 
 # ----------------------------------------------------------------------------- helpers
@@ -34,11 +31,11 @@ K = np.sqrt(2 / np.pi)        # fair one-day protection cost ~ 0.8 x expected mo
 def load_data():
     try:
         folder = Path(__file__).parent
-    except NameError:             # pasted into a notebook: look in the working folder
+    except NameError:
         folder = Path.cwd()
     df = pd.read_csv(folder / "simulator_data.csv", parse_dates=["Date"])
     for c in ["rv", "har", "lhar", "lstm", "eg", "ret"]:
-        df[c] = df[c] / 100       # basis points -> percent
+        df[c] = df[c] / 100
     return df.sort_values(["Symbol", "Date"]).reset_index(drop=True)
 
 
@@ -91,7 +88,7 @@ info = df.groupby("Symbol").agg(Group=("Group", "first"), Rank=("Liquidity_Rank"
 symbols = info.index.tolist()
 
 # ----------------------------------------------------------------------------- intro
-st.title("Can AI predict how risky a stock will be tomorrow?")
+st.title("Can an ML model predict how risky a stock will be tomorrow?")
 st.write(
     "Every day a stock's price swings by some amount. That swing is its **risk** (traders call it "
     "*volatility*). If you know tomorrow's swing in advance, you can price insurance on the stock, decide "
@@ -105,9 +102,9 @@ with st.expander("The four prediction methods, in one line each"):
         "The standard method in finance.\n"
         "- **Improved formula (log-HAR):** the same idea with one mathematical fix that stops rare extreme "
         "days from distorting it.\n"
-        "- **AI model (HAR-RV-LSTM):** a neural network that reads the last 22 days of swings and learns "
+        "- **ML model (HAR-RV-LSTM):** a neural network that reads the last 22 days of swings and learns "
         "patterns across all 95 stocks. **This is our main model.**\n"
-        "- **AI on daily prices only (EGARCH-LSTM):** a neural network that only sees end-of-day prices, "
+        "- **ML model on daily prices only (EGARCH-LSTM):** a neural network that only sees end-of-day prices, "
         "not the swings inside the day."
     )
 
@@ -116,14 +113,14 @@ with c1:
     sym = st.selectbox("Pick a stock", symbols, index=symbols.index("RELIANCE") if "RELIANCE" in symbols else 0,
                        format_func=lambda x: f"{x}  ·  {GROUPS[info.loc[x, 'Group']].lower()}")
 with c2:
-    show_all = st.toggle("Show all four methods (default: Classic formula vs AI model)", value=False)
+    show_all = st.toggle("Show all four methods (default: Classic formula vs ML model)", value=False)
 shown = list(MODELS) if show_all else ["har", "lstm"]
 st.caption(f"{sym} is **{GROUPS[info.loc[sym, 'Group']].lower()}**: about ₹{info.loc[sym, 'Turnover']:,} crore "
            f"changes hands a day (rank {info.loc[sym, 'Rank']} of 95, where 1 is the most traded).")
 
 s = df[df["Symbol"] == sym].set_index("Date")
 tabs = st.tabs(["1 · How accurate is it?", "2 · Hedging: pricing protection", "3 · Safety money (margin)",
-                "4 · Building a portfolio", "5 · Where does AI help most?"])
+                "4 · Building a portfolio", "5 · Where does Machine Learning help most?"])
 
 # ----------------------------------------------------------------------------- 1 accuracy
 with tabs[0]:
@@ -142,12 +139,12 @@ with tabs[0]:
     closer = ((s["lstm"] - s["rv"]).abs() < (s["har"] - s["rv"]).abs()).mean()
     a, b, c = st.columns(3)
     a.metric("Average actual swing", f"{s['rv'].mean():.2f}% a day")
-    b.metric("AI model's average miss", f"{miss['lstm']:.2f} points",
+    b.metric("ML model's average miss", f"{miss['lstm']:.2f} points",
              f"{better(miss['lstm'], miss['har']):.0f}% smaller than Classic formula")
-    c.metric("Days the AI was closer than Classic", f"{100 * closer:.0f}%")
+    c.metric("Days the ML model was closer than Classic", f"{100 * closer:.0f}%")
     st.success(f"**In plain words:** {sym} swings about {s['rv'].mean():.2f}% a day. The Classic formula's "
-               f"prediction is off by {miss['har']:.2f} points on a typical day; the AI model is off by "
-               f"{miss['lstm']:.2f}. The AI was the closer of the two on {100 * closer:.0f}% of days.")
+               f"prediction is off by {miss['har']:.2f} points on a typical day; the ML model is off by "
+               f"{miss['lstm']:.2f}. The ML model was the closer of the two on {100 * closer:.0f}% of days.")
     table(pd.DataFrame({
         "Average miss (points)": [f"{miss[k]:.3f}" for k in MODELS],
         "Tends to predict": [f"{100 * (s[k].mean() / s['rv'].mean() - 1):+.0f}% vs actual" for k in MODELS],
@@ -171,9 +168,9 @@ with tabs[1]:
     a, b, c = st.columns(3)
     a.metric("Fair price of one day's protection", inr(fair))
     b.metric("Classic formula: wrong by", f"{inr(err['har'])} a day")
-    c.metric("AI model: wrong by", f"{inr(err['lstm'])} a day",
+    c.metric("ML model: wrong by", f"{inr(err['lstm'])} a day",
              f"{better(err['lstm'], err['har']):.0f}% less mispricing")
-    st.success(f"**In plain words:** over the 15 months, pricing {sym}'s daily protection with the AI model "
+    st.success(f"**In plain words:** over the 15 months, pricing {sym}'s daily protection with the ML model "
                f"instead of the Classic formula would have avoided "
                f"{inr(gap['har'].abs().sum() - gap['lstm'].abs().sum())} of mispricing on a "
                f"{inr(amount)} position.")
@@ -205,14 +202,14 @@ with tabs[2]:
     bad = {k: int((loss > held[k]).sum()) for k in MODELS}
     a, b, c = st.columns(3)
     a.metric("Cash locked up, Classic formula", inr(held["har"].mean()))
-    b.metric("Cash locked up, AI model", inr(held["lstm"].mean()),
+    b.metric("Cash locked up, ML model", inr(held["lstm"].mean()),
              f"{inr(held['har'].mean() - held['lstm'].mean())} freed", delta_color="normal")
-    c.metric("Days the loss beat the safety money", f"Classic {bad['har']} · AI {bad['lstm']}",
+    c.metric("Days the loss beat the safety money", f"Classic {bad['har']} · ML {bad['lstm']}",
              f"out of {len(s)} days", delta_color="off")
     st.info("**In plain words:** grey bars are real losses; a line is the safety money a method would have "
             "kept. A bar poking above the line is a day the cushion was not enough. The honest trade-off: "
             "the Classic formula predicts too high on average, so it locks up more cash and is breached a "
-            "little less often. The AI model frees cash but sits closer to the edge.")
+            "little less often. The ML model frees cash but sits closer to the edge.")
     table(pd.DataFrame({
         "Average cash locked up": [inr(held[k].mean()) for k in MODELS],
         "Days cushion was not enough": [f"{bad[k]} of {len(s)}" for k in MODELS],
@@ -241,11 +238,11 @@ with tabs[3]:
 
         plans = {"Equal money in each": pd.DataFrame(1 / len(picks), index=ret.index, columns=picks),
                  "Risk-balanced, Classic formula": weights("har"),
-                 "Risk-balanced, AI model": weights("lstm")}
+                 "Risk-balanced, ML model": weights("lstm")}
         rows, shares = [], {}
         for name, w in plans.items():
-            pnl = w * ret / 100 * capital                      # rupee P&L per stock per day
-            risk = np.sqrt((pnl ** 2).mean())                  # each stock's typical daily swing in rupees
+            pnl = w * ret / 100 * capital
+            risk = np.sqrt((pnl ** 2).mean())
             share = risk / risk.sum()
             shares[name] = share
             total = pnl.sum(axis=1)
@@ -264,27 +261,27 @@ with tabs[3]:
             chart(fig, "Share of portfolio risk (%)", height=380)
             st.caption("Dashed line = perfectly equal shares.")
         with right:
-            st.markdown("**How the AI model adjusts the money in each stock over time**")
-            w = plans["Risk-balanced, AI model"].rolling(5, min_periods=1).mean() * 100
+            st.markdown("**How the ML model adjusts the money in each stock over time**")
+            w = plans["Risk-balanced, ML model"].rolling(5, min_periods=1).mean() * 100
             fig = go.Figure()
             for x in picks:
                 fig.add_scatter(x=w.index, y=w[x], name=x, stackgroup="one", line=dict(width=0.5))
             chart(fig, "Share of money (%)", height=380)
             st.caption("When a stock is predicted to get jumpier, its slice shrinks.")
         table(pd.DataFrame(rows).set_index("Plan"))
-        eq, ai = shares["Equal money in each"], shares["Risk-balanced, AI model"]
+        eq, ai = shares["Equal money in each"], shares["Risk-balanced, ML model"]
         st.success(f"**In plain words:** with equal money, **{eq.idxmax()}** alone carries "
                    f"{100 * eq.max():.0f}% of the portfolio's risk (ideal: {100 / len(picks):.0f}%). "
-                   f"With the AI model's daily adjustments, the biggest share falls to {100 * ai.max():.0f}%.")
+                   f"With the ML model's daily adjustments, the biggest share falls to {100 * ai.max():.0f}%.")
         st.caption("Uses each stock's own daily swings during market hours; overnight moves and links between "
                    "stocks are left out to keep the idea simple.")
 
 # ----------------------------------------------------------------------------- 5 liquidity
 with tabs[4]:
-    st.subheader("Where does the AI help most?")
+    st.subheader("Where does the Machine Learning help most?")
     st.write("Some stocks trade in huge volumes all day (Reliance, SBI, Infosys). Others trade thinly, and "
              "their prices are jumpier and harder to predict. We sorted the 95 stocks into three equal groups "
-             "by how heavily they trade and measured how much the AI model reduces the prediction error.")
+             "by how heavily they trade and measured how much the ML model reduces the prediction error.")
 
     @st.cache_data
     def per_stock_scores():
@@ -299,7 +296,7 @@ with tabs[4]:
     g_improved = better(grp["lstm"], grp["lhar"])
     left, right = st.columns(2)
     with left:
-        st.markdown("**Error reduction from the AI model, by group**")
+        st.markdown("**Error reduction from the ML model, by group**")
         fig = go.Figure()
         fig.add_bar(x=list(GROUPS.values()), y=g_classic.values, name="vs Classic formula",
                     marker_color=COLORS["har"], text=[f"{v:.1f}%" for v in g_classic], textposition="outside")
@@ -308,7 +305,7 @@ with tabs[4]:
         fig.update_layout(barmode="group")
         chart(fig, "Error reduction (%)", height=380)
     with right:
-        st.markdown("**Each dot is one stock (AI model vs Improved formula)**")
+        st.markdown("**Each dot is one stock (ML model vs Improved formula)**")
         fig = go.Figure()
         for g, name in GROUPS.items():
             p = ps[ps["Group"] == g]
@@ -319,14 +316,14 @@ with tabs[4]:
         fig.update_layout(xaxis_title="← most traded        least traded →")
         fig.update_layout(hovermode="closest")
         chart(fig, "Error reduction (%)", height=380, zero=False)
-    st.success(f"**In plain words:** against the Classic formula the AI model cuts the error by about "
+    st.success(f"**In plain words:** against the Classic formula the ML model cuts the error by about "
                f"{g_classic.min():.0f} to {g_classic.max():.0f}% in every group. Against the Improved formula, "
-               f"which is a much tougher opponent, the AI adds {g_improved['H']:.1f}% for heavily traded "
+               f"which is a much tougher opponent, the ML adds {g_improved['H']:.1f}% for heavily traded "
                f"stocks, {g_improved['M']:.1f}% for moderately traded and {g_improved['L']:.1f}% for thinly "
-               f"traded ones. So the AI earns its keep on the hard-to-predict stocks; for the giants a good "
+               f"traded ones. So the ML earns its keep on the hard-to-predict stocks; for the giants a good "
                f"formula is enough.")
     st.caption("Error here is QLIKE, the standard score for risk forecasts (0 = perfect). Dots above the line "
-               "are stocks where the AI model wins.")
+               "are stocks where the ML model wins.")
 
 # ----------------------------------------------------------------------------- scorecard
 st.header("Scorecard: all 95 stocks together")
@@ -355,12 +352,12 @@ def scorecard():
 table(scorecard())
 st.markdown(
     "**What this means**\n"
-    "- **Accuracy:** the AI model is the most accurate method on 66 of the 95 stocks.\n"
+    "- **Accuracy:** the ML model is the most accurate method on 66 of the 95 stocks.\n"
     "- **Hedging:** its predictions misprice protection the least.\n"
     "- **Safety money:** it locks up the least cash, at the cost of slightly more close calls.\n"
     "- **Portfolios:** sizing positions with it keeps each stock's risk closest to its target.\n"
     "- **Honest limit:** most of the improvement over the Classic formula comes from one mathematical fix "
-    "(the Improved formula). The AI adds a smaller extra gain on top, mainly in thinly traded stocks."
+    "(the Improved formula). The ML adds a smaller extra gain on top, mainly in thinly traded stocks."
 )
 with st.expander("Technical details"):
     st.markdown(
