@@ -8,7 +8,7 @@ import os
 # --------------------------------------------------------------------------
 # Paths
 # --------------------------------------------------------------------------
-# PROJECT_ROOT is the folder that contains src/, notebooks/, results/ ...
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # The raw 5-minute CSV files (about 1 GB) are kept OUTSIDE the project folder.
@@ -47,7 +47,6 @@ BAD_TICK_REVERSAL = 0.25           # spike is "bad" if the next bar undoes >= 75
 CORPORATE_ACTION_GAP = 0.35        # |overnight log return| treated as split / bonus
 
 # Listing dates for stocks whose files contain pre-listing rows
-# (bond prices, placeholder prices or zero-volume quotes before the IPO).
 LISTING_DATES = {
     "IRFC": "2021-01-29",
     "SBILIFE": "2017-10-03",
